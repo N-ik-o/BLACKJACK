@@ -14,6 +14,10 @@ a small blackjack game
 
 ## Requirements
 Python 3.x
+colorama>=0.4.6
+
+## Install dependencies
+python3 -m pip install colorama
 
 ---
 
