@@ -1,8 +1,11 @@
 import random
 import os
+from colorama import Fore, Style, init
+
+init()
 
 def clear_terminal():
-    os.system("clear")
+    os.system("cls" if os.name == "nt" else "clear")
 
 #cards
 DECK = ["A","A","A","A","K","K","K","K","Q","Q","Q","Q","J","J","J","J",10,10,10,10,9,9,9,9,8,8,8,8,7,7,7,7,6,6,6,6,5,5,5,5,4,4,4,4,3,3,3,3,2,2,2,2]
@@ -72,6 +75,7 @@ def bust_check(person_name, person_points):
     if person_points > 21:
         bust = True
         print(f"{person_name} busted!")
+        print(Style.RESET_ALL)
     else:
         bust = False
     return bust
@@ -82,16 +86,22 @@ def first_choice(player,player_points,cards):
     while choice != "h" and choice != "s" and choice != "d":
         choice = input("Hit (h), Stand (s), or Double down (d)? ")
     if choice == "h":
+        print(Fore.CYAN)
         player,cards = deal_card(player,PLAYER_NAME,cards)
         player_points = eval_points(player,PLAYER_NAME)
         bust = bust_check(PLAYER_NAME,player_points)
+        print(Style.RESET_ALL)
     elif choice == "d":
+        print(Fore.CYAN)
         player,cards = deal_card(player,PLAYER_NAME,cards)
         print("You doubled down.")
         player_points = eval_points(player,PLAYER_NAME)
         bust = bust_check(PLAYER_NAME,player_points)
+        print(Style.RESET_ALL)
     else: 
+        print(Fore.CYAN)
         print(f"You stand with {player_points} points")
+        print(Style.RESET_ALL)
         bust = False
     return bust,choice,player_points
 
@@ -101,11 +111,13 @@ def choices(player,player_points,cards):
     while choice != "s" and choice != "h":
         choice = input("Hit (h) or Stand (s)? ")
     if choice == "h":
+        print(Fore.CYAN)
         player,cards = deal_card(player,PLAYER_NAME,cards)
         player_points = eval_points(player,PLAYER_NAME)
         bust = bust_check(PLAYER_NAME,player_points)
+        print(Style.RESET_ALL)
     else: 
-        print(f"You stand with {player_points} points")
+        print(Fore.CYAN + f"You stand with {player_points} points" + Style.RESET_ALL)
         bust = False
     return bust,choice,player_points
 
@@ -124,7 +136,7 @@ def bet(chips):
         try:
             stakes = int(input("How much do you want to bet this round? "))
             if stakes > chips or stakes <= 0:
-                stakes = int(input(f"You only have {chips} chips left. How much do you want to bet this round? "))
+                print(f"You only have {chips} chips left. Enter a valid bet")
             else:
                 return stakes
         except:
@@ -137,10 +149,10 @@ def determine_winner(dealer,player,chips,stakes):
     if dealer_points == player_points:
         print("It's a tie!")
     elif dealer_points > player_points:
-        print(f"The dealer wins! {dealer_points} - {player_points}")
+        print(Fore.RED + f"The dealer wins! {dealer_points} - {player_points}" + Style.RESET_ALL)
         chips -= stakes
     else:
-        print(f"You win! {player_points} - {dealer_points}")
+        print(Fore.GREEN + f"You win! {player_points} - {dealer_points}" + Style.RESET_ALL)
         chips += stakes
     return chips
 
@@ -169,7 +181,9 @@ def play_blackjack():
         stakes = bet(chips)
 
         #first deal
+        print(Fore.YELLOW)
         dealer,cards = deal_card(dealer,DEALER_NAME,cards)
+        print(Fore.CYAN)
         player,cards = deal_card(player,PLAYER_NAME,cards) 
         player,cards = deal_card(player,PLAYER_NAME,cards)
         player_points = eval_points(player,PLAYER_NAME)
@@ -177,43 +191,48 @@ def play_blackjack():
 
         if blackjack == False:
             #choices
+            print(Style.RESET_ALL)
             bust,choice,player_points = first_choice(player,player_points,cards)
             if choice == "d":
                 if bust == False:
                     #dealer's turn
+                    print(Fore.YELLOW)
                     bust = dealers_turn(dealer,cards)
                     if bust == False:
-                        chips = determine_winner(dealer,player,chips,stakes)
-                        chips = determine_winner(dealer,player,chips,stakes) # 2 times bc of double down
+                        print(Style.RESET_ALL)
+                        chips = determine_winner(dealer,player,chips,stakes * 2) # 2 times bc of double down
                     else:
                         chips += 2 * stakes
-                        print("You win!")
+                        print(Fore.GREEN + "You win!" + Style.RESET_ALL)
                 else:
                     chips -= 2 * stakes
-                    print("You lost!")
+                    print(Fore.RED + "You lost!" + Style.RESET_ALL)
             else:
                 while choice == "h" and bust == False:
                     bust,choice,player_points = choices(player,player_points,cards)
                 if bust == False:
                     #dealer's turn
+                    print(Fore.YELLOW)
                     bust = dealers_turn(dealer,cards)
+                    print(Style.RESET_ALL)
                     if bust == False:
                         chips = determine_winner(dealer,player,chips,stakes)
                     else:
                         chips += stakes
-                        print("You win!")
+                        print(Fore.GREEN + "You win!" + Style.RESET_ALL)
                 else:
                     chips -= stakes
-                    print("You lost!")
+                    print(Fore.RED + "You lost!" + Style.RESET_ALL)
         else: 
-            chips += (stakes * 2.5) 
-            chips = int(round(chips))
+            chips += int(stakes * 1.5) 
+        print(Style.RESET_ALL)
         again = input("Wanna play again? (y/n) ")
     if again == "n":
-        print(f"You leave the table with {chips} chips.")
+        print(Fore.GREEN + f"You leave the table with {chips} chips." + Style.RESET_ALL)
         print("See you again soon!")
     else:
-        print(f"You are broke. You have {chips} chips left. Leave the table now.")
+        print(Fore.RED + f"You are broke. You have {chips} chips left. Leave the table now." + Style.RESET_ALL)
+        print("See you again soon!")
 
 
 play_blackjack()
